@@ -1,49 +1,39 @@
 #!/usr/bin/python3
 import sys
-from collections import defaultdict
-import signal
+
+total_file_size = 0
+code = 0
+counter = 0
+dict_sc = {"200": 0, "301": 0, "400": 0, "401": 0,
+           "403": 0, "404": 0, "405": 0, "500": 0
+           }
 
 
-def print_statistics(total_size, status_counts):
-    print(f'Total file size: {total_size}')
-    for status_code in sorted(status_counts):
-        print(f'{status_code}: {status_counts[status_code]}')
+def print_msg(dict_sc, total_file_size):
+    """Method to print"""
+    print("File size: {}".format(total_file_size))
+    for key, val in sorted(dict_sc.items()):
+        if val != 0:
+            print("{}: {}".format(key, val))
 
+try:
+    for line in sys.stdin:
+        parsed_line = line.split()
+        parsed_line = parsed_line[::-1]
 
-def main():
-    total_size = 0
-    status_counts = defaultdict(int)
-    lines_processed = 0
+        if len(parsed_line) > 2:
+            counter += 1
 
-    def handle_interrupt(signal, frame):
-        print_statistics(total_size, status_counts)
-        sys.exit(0)
+            if counter <= 10:
+                total_file_size += int(parsed_line[0])
+                code = parsed_line[1]
 
-    signal.signal(signal.SIGINT, handle_interrupt)
+                if (code in dict_sc.keys()):
+                    dict_sc[code] += 1
 
-    try:
-        for line in sys.stdin:
-            try:
-                parts = line.split()
-                ip_address = parts[0]
-                date = parts[3][1:]
-                status_code = int(parts[-2])
-                file_size = int(parts[-1])
+            if (counter == 10):
+                print_msg(dict_sc, total_file_size)
+                counter = 0
 
-                if parts[5] == '"GET' and parts[6].startswith('/projects/260') and parts[7] == 'HTTP/1.1"':
-                    total_size += file_size
-                    status_counts[status_code] += 1
-                    lines_processed += 1
-
-                    if lines_processed % 10 == 0:
-                        print_statistics(total_size, status_counts)
-
-            except (ValueError, IndexError):
-                pass
-
-    except KeyboardInterrupt:
-        handle_interrupt(None, None)
-
-
-if __name__ == "__main__":
-    main()
+finally:
+    print_msg(dict_sc, total_file_size)
