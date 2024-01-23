@@ -16,6 +16,7 @@ def print_msg(dict_sc, total_file_size):
         if val != 0:
             print("{}: {}".format(key, val))
 
+
 try:
     for line in sys.stdin:
         parsed_line = line.split()
