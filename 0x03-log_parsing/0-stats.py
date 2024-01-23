@@ -1,42 +1,55 @@
 #!/usr/bin/python3
-"""reads from stdin and computes metrics"""
+""" reads from stdin and computes metrics """
 import re
 import sys
 
-file_size = 0
-code = 0
-counter = 0
-dict_sc = {"200": 0, "301": 0, "400": 0, "401": 0,
+total_size = 0
+lines = 0
+status_codes = {"200": 0, "301": 0, "400": 0, "401": 0,
            "403": 0, "404": 0, "405": 0, "500": 0
            }
+PATTERN = (r"^(\S+) ?"
+           r"- ?\[\S+ ?\S+\] "
+           r"\"GET /projects/260 HTTP/1\.1\" "
+           r"(\S+) (\S+)$")
 
 
-def printCodes(dict, file_s):
-    """Prints the status code and the number of times they appear"""
-    print("File size: {}".format(file_s))
-    for key in sorted(dict.keys()):
-        if dict_sc[key] != 0:
-            print("{}: {}".format(key, dict[key]))
+def extract_status_and_size(line):
+    """ extracts the status code and size from a log line """
+    match = re.search(PATTERN, line)
+
+    if match:
+        return (match.group(2), match.group(3))
+    else:
+        return None, None
 
 
-if __name__ == "__main__":
-    try:
-        for line in sys.stdin:
-            split_string = re.split('- |"|"| " " ', str(line))
-            statusC_and_file_s = split_string[-1]
-            if counter != 0 and counter % 10 == 0:
-                printCodes(dict_sc, file_size)
-            counter = counter + 1
+def printMetrics(total_size, status_codes):
+    """ prints the metrics """
+    print("File size: {}".format(str(total_size)))
+    for status_code in sorted(status_codes.keys()):
+        if status_codes[status_code] != 0:
+            print("{}: {}".format(status_code, str(status_codes[status_code])))
+
+try:
+    for line in sys.stdin:
+        lines += 1
+
+        status_code, size = extract_status_and_size(line.strip())
+        if status_code and size:
             try:
-                statusC = int(statusC_and_file_s.split()[0])
-                f_size = int(statusC_and_file_s.split()[1])
-                # print("Status Code {} size {}".format(statusC, f_size))
-                if statusC in dict_sc:
-                    dict_sc[statusC] += 1
-                file_size = file_size + f_size
-            except:
+                total_size += int(size)
+            except Exception:
                 pass
-        printCodes(dict_sc, file_size)
-    except KeyboardInterrupt:
-        printCodes(dict_sc, file_size)
-        raise
+            try:
+                if status_code in status_codes:
+                    status_codes[status_code] += 1
+            except Exception:
+                pass
+
+        if lines % 10 == 0 and lines != 0:
+            printMetrics(total_size, status_codes)
+    printMetrics(total_size, status_codes)
+except KeyboardInterrupt:
+    printMetrics(total_size, status_codes)
+    raise
