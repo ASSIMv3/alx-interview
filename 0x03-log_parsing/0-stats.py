@@ -7,8 +7,8 @@ file_size = 0
 code = 0
 counter = 0
 dict_sc = {"200": 0, "301": 0, "400": 0, "401": 0,
-            "403": 0, "404": 0, "405": 0, "500": 0
-            }
+           "403": 0, "404": 0, "405": 0, "500": 0
+           }
 
 
 def printCodes(dict, file_s):
@@ -30,13 +30,12 @@ if __name__ == "__main__":
             try:
                 statusC = int(statusC_and_file_s.split()[0])
                 f_size = int(statusC_and_file_s.split()[1])
-                # print("Status Code {} size {}".format(statusC, f_size))
                 if statusC in dict_sc:
                     dict_sc[statusC] += 1
                 file_size = file_size + f_size
             except:
                 pass
         printCodes(dict_sc, file_size)
-    except KeyboardInterrupt:
+    except:
         printCodes(dict_sc, file_size)
         raise
