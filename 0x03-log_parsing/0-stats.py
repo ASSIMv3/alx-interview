@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+"""reads from stdin and computes metrics"""
 import sys
 
 total_file_size = 0
