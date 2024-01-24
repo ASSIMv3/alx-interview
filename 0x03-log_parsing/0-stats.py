@@ -1,41 +1,44 @@
 #!/usr/bin/python3
-"""reads from stdin and computes metrics"""
-import re
+""" Reads from stdin and computes metrics """
+
 import sys
-
-file_size = 0
-code = 0
-counter = 0
-dict_sc = {"200": 0, "301": 0, "400": 0, "401": 0,
-           "403": 0, "404": 0, "405": 0, "500": 0
-           }
+import re
 
 
-def printCodes(dict, file_s):
-    """Prints the status code and the number of times they appear"""
-    print("File size: {}".format(file_s))
-    for key in sorted(dict.keys()):
-        if dict_sc[key] != 0:
-            print("{}: {}".format(key, dict[key]))
+def output(log: dict) -> None:
+    """ Display stats """
+    print("File size: {}".format(log["file_size"]))
+    for code in sorted(log["code_frequency"]):
+        if log["code_frequency"][code]:
+            print("{}: {}".format(code, log["code_frequency"][code]))
 
 
 if __name__ == "__main__":
+    regex = re.compile(
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} - \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d+\] "GET /projects/260 HTTP/1.1" (.{3}) (\d+)')
+
+    line_count = 0
+    log = {}
+    log["file_size"] = 0
+    log["code_frequency"] = {
+        str(code): 0 for code in [
+            200, 301, 400, 401, 403, 404, 405, 500]}
+
     try:
         for line in sys.stdin:
-            split_string = re.split('- |"|"| " " ', str(line))
-            statusC_and_file_s = split_string[-1]
-            if counter != 0 and counter % 10 == 0:
-                printCodes(dict_sc, file_size)
-            counter = counter + 1
-            try:
-                statusC = int(statusC_and_file_s.split()[0])
-                f_size = int(statusC_and_file_s.split()[1])
-                if statusC in dict_sc:
-                    dict_sc[statusC] += 1
-                file_size = file_size + f_size
-            except:
-                pass
-        printCodes(dict_sc, file_size)
-    except:
-        printCodes(dict_sc, file_size)
-        raise
+            line = line.strip()
+            match = regex.fullmatch(line)
+            if (match):
+                line_count += 1
+                code = match.group(1)
+                file_size = int(match.group(2))
+
+                log["file_size"] += file_size
+
+                if (code.isdecimal()):
+                    log["code_frequency"][code] += 1
+
+                if (line_count % 10 == 0):
+                    output(log)
+    finally:
+        output(log)
