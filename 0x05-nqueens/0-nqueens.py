@@ -1,53 +1,84 @@
 #!/usr/bin/python3
 """solves the N queens problem"""
+
 import sys
 
 
-def is_safe(board, row, col):
-    """checks whether it is safe to place a queen at a specific position"""
-    for i in range(row):
-        if board[i] == col:
-            return False
-
-    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
-        if board[i] == j:
-            return False
-
-    for i, j in zip(range(row, -1, -1), range(col, len(board))):
-        if board[i] == j:
-            return False
-
-    return True
-
-def solve_n_queens(board, row):
-    """find solutions to the N queens problem"""
-    n = len(board)
-    if row == n:
-        print(board)
-        return
-
-    for col in range(n):
-        if is_safe(board, row, col):
-            board[row] = col
-            solve_n_queens(board, row + 1)
-            board[row] = -1
-
-def nqueens(n):
-    if not n.isdigit():
-        print("N must be a number")
-        sys.exit(1)
-
-    n = int(n)
-    if n < 4:
-        print("N must be at least 4")
-        sys.exit(1)
-
-    board = [-1] * n
-    solve_n_queens(board, 0)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     if len(sys.argv) != 2:
         print("Usage: nqueens N")
         sys.exit(1)
 
-    nqueens(sys.argv[1])
+    try:
+        n = int(sys.argv[1])
+    except ValueError:
+        print('N must be a number')
+        exit(1)
+
+    if n < 4:
+        print('N must be at least 4')
+        exit(1)
+
+    solutions = []
+    placed_queens = []
+    stop = False
+    r = 0
+    c = 0
+
+    while r < n:
+        goback = False
+        while c < n:
+            safe = True
+            for cord in placed_queens:
+                col = cord[1]
+                if(col == c or col + (r-cord[0]) == c or
+                        col - (r-cord[0]) == c):
+                    safe = False
+                    break
+
+            if not safe:
+                if c == n - 1:
+                    goback = True
+                    break
+                c += 1
+                continue
+
+            # place queen
+            cords = [r, c]
+            placed_queens.append(cords)
+            if r == n - 1:
+                solutions.append(placed_queens[:])
+                for cord in placed_queens:
+                    if cord[1] < n - 1:
+                        r = cord[0]
+                        c = cord[1]
+                for i in range(n - r):
+                    placed_queens.pop()
+                if r == n - 1 and c == n - 1:
+                    placed_queens = []
+                    stop = True
+                r -= 1
+                c += 1
+            else:
+                c = 0
+            break
+        if stop:
+            break
+        if goback:
+            r -= 1
+            while r >= 0:
+                c = placed_queens[r][1] + 1
+                del placed_queens[r]
+                if c < n:
+                    break
+                r -= 1
+            if r < 0:
+                break
+            continue
+        r += 1
+
+    for idx, val in enumerate(solutions):
+        if idx == len(solutions) - 1:
+            print(val, end='')
+        else:
+            print(val)
