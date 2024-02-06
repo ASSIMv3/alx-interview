@@ -22,6 +22,7 @@ def main() -> None:
     negative_diagonal = set()
     board = []
 
+
     def backtrack(row: int) -> None:
         """Recursive function to explore all possible queen placements"""
         if row == N:
