@@ -1,84 +1,54 @@
 #!/usr/bin/python3
 """solves the N queens problem"""
-
 import sys
 
 
-if __name__ == '__main__':
+def main() -> None:
+    """Main function to solve the problem"""
     if len(sys.argv) != 2:
         print("Usage: nqueens N")
-        sys.exit(1)
-
+        exit(1)
     try:
-        n = int(sys.argv[1])
+        N = int(sys.argv[1])
     except ValueError:
-        print('N must be a number')
+        print("N must be a number")
+        exit(1)
+    if N < 4:
+        print("N must be at least 4")
         exit(1)
 
-    if n < 4:
-        print('N must be at least 4')
-        exit(1)
+    columns = set()
+    positive_diagonal = set()
+    negative_diagonal = set()
+    board = []
 
-    solutions = []
-    placed_queens = []
-    stop = False
-    r = 0
-    c = 0
+    def backtrack(row: int) -> None:
+        """Recursive function to explore all possible queen placements"""
+        if row == N:
+            print(board)
+            return
 
-    while r < n:
-        goback = False
-        while c < n:
-            safe = True
-            for cord in placed_queens:
-                col = cord[1]
-                if(col == c or col + (r-cord[0]) == c or
-                        col - (r-cord[0]) == c):
-                    safe = False
-                    break
-
-            if not safe:
-                if c == n - 1:
-                    goback = True
-                    break
-                c += 1
+        for col in range(N):
+            unvalid_col = col in columns
+            unvalid_pos = (row + col) in positive_diagonal
+            unvalid_neg = (row - col) in negative_diagonal
+            if unvalid_col or unvalid_pos or unvalid_neg:
                 continue
 
-            # place queen
-            cords = [r, c]
-            placed_queens.append(cords)
-            if r == n - 1:
-                solutions.append(placed_queens[:])
-                for cord in placed_queens:
-                    if cord[1] < n - 1:
-                        r = cord[0]
-                        c = cord[1]
-                for i in range(n - r):
-                    placed_queens.pop()
-                if r == n - 1 and c == n - 1:
-                    placed_queens = []
-                    stop = True
-                r -= 1
-                c += 1
-            else:
-                c = 0
-            break
-        if stop:
-            break
-        if goback:
-            r -= 1
-            while r >= 0:
-                c = placed_queens[r][1] + 1
-                del placed_queens[r]
-                if c < n:
-                    break
-                r -= 1
-            if r < 0:
-                break
-            continue
-        r += 1
+            columns.add(col)
+            positive_diagonal.add(row + col)
+            negative_diagonal.add(row - col)
+            board.append([row, col])
 
-    for idx, val in enumerate(solutions):
-        if idx == len(solutions) - 1:
-            print(val, end='')
-        else:
-            print(val)
+            backtrack(row + 1)
+
+            columns.remove(col)
+            positive_diagonal.remove(row + col)
+            negative_diagonal.remove(row - col)
+            board.remove([row, col])
+
+    backtrack(0)
+
+
+if __name__ == '__main__':
+    main()
