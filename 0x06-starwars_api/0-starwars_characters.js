@@ -1,23 +1,48 @@
 #!/usr/bin/node
-const axios = require('axios');
+const request = require('request');
 
-const fetchCharacterNames = async (movieId) => {
-    try {
-        const response = await axios.get(`https://swapi-api.alx-tools.com/api/films/${movieId}/`);
-        const characters = response.data.characters;
-        for (const characterUrl of characters) {
-            const characterResponse = await axios.get(characterUrl);
-            console.log(characterResponse.data.name);
-        }
-    } catch (error) {
-        console.error('Error fetching data:', error.message);
-    }
-};
+const URL = 'https://swapi-api.alx-tools.com/api/films/';
+const filmId = process.argv[2];
 
-const movieId = process.argv[2];
-if (!movieId) {
-    console.log("Please provide a movie ID as argument.");
-    process.exit(1);
+if (!filmId) {
+  console.log('Please provide a film ID as argument.');
+  process.exit(1);
 }
 
-fetchCharacterNames(movieId);
+request(URL + filmId + '/', (err, res, body) => {
+  if (err) {
+    console.error(err);
+    return;
+  } else if (res.statusCode !== 200) {
+    console.error('Error:', res.statusCode);
+    return;
+  }
+
+  body = JSON.parse(body);
+
+  const charactersLength = body.characters.length;
+  let printed = 0;
+
+  const printCharacter = (characterUrl) => {
+    request(characterUrl, (err, res, body) => {
+      if (err) {
+        console.error(err);
+        return;
+      } else if (res.statusCode !== 200) {
+        console.error('Error:', res.statusCode);
+        return;
+      }
+
+      body = JSON.parse(body);
+      console.log(body.name);
+      printed++;
+
+      if (printed === charactersLength) {
+        process.exit(0); // Exit when all characters are printed
+      }
+    });
+  };
+
+  // Print characters
+  body.characters.forEach(characterUrl => printCharacter(characterUrl));
+});
