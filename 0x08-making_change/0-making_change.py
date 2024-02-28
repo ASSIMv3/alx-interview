@@ -1,16 +1,17 @@
 #!/usr/bin/python3
-"""0-making_change Module"""
+"""This is to make a change
+"""
 
 
 def makeChange(coins, total):
-    """Return fewest number of coins needed to meet total"""
-    temp_value = 0
-    coins.sort(reverse=True)
-
-    if total < 0:
+    """function with 2 arguments"""
+    if total <= 0:
         return 0
+
+    dp = [total + 1] * (total + 1)  # Initialize with total + 1
+    dp[0] = 0
     for coin in coins:
-        if total % coin <= total:
-            temp_value += total // coin
-            total = total % coin
-    return temp_value if total == 0 else -1
+        for amount in range(coin, total + 1):
+            dp[amount] = min(dp[amount], dp[amount - coin] + 1)
+
+    return dp[total] if dp[total] != total + 1 else -1
