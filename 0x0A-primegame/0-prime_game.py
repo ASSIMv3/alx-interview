@@ -4,33 +4,29 @@
 
 def primeNumbers(n):
     """Determines the winner of a series of games played"""
-    primes = []
-    sieve = [True] * (n + 1)
-    sieve[0] = sieve[1] = False
-    for i in range(2, n + 1):
-        if sieve[i]:
-            primes.append(i)
-            for j in range(i * i, n + 1, i):
-                sieve[j] = False
-    return primes
+    primeNos = []
+    filtered = [True] * (n + 1)
+    for prime in range(2, n + 1):
+        if (filtered[prime]):
+            primeNos.append(prime)
+            for i in range(prime, n + 1, prime):
+                filtered[i] = False
+    return primeNos
 
 
 def isWinner(x, nums):
     """Determines the winner of a series of games played"""
-    if x is None or nums is None or x == 0 or not nums:
+    if x is None or nums is None or x == 0 or nums == []:
         return None
-
-    maria = ben = 0
+    Maria = Ben = 0
     for i in range(x):
-        prime_nos = prime_numbers(nums[i])
-        if len(prime_nos) % 2 == 0:
-            ben += 1
+        primeNos = primeNumbers(nums[i])
+        if len(primeNos) % 2 == 0:
+            Ben += 1
         else:
-            maria += 1
-    
-    if maria > ben:
+            Maria += 1
+    if Maria > Ben:
         return 'Maria'
-    elif ben > maria:
+    elif Ben > Maria:
         return 'Ben'
-    else:
-        return None
+    return None
