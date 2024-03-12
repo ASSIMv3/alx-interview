@@ -17,14 +17,14 @@ def is_prime(n):
 
 def is_winner(x, nums):
     """Determines the winner of a series of games played"""
-    maria_wins = 0
-    ben_wins = 0
+    players = {'Maria': 0, 'Ben': 0}
+    for round in range(x):
+        n = nums[round]
 
-    for n in nums:
         winner = 1
         i = 2
         while i <= n:
-            while i <= n + 1 and not is_prime(i):
+            while (i <= n + 1) and (not is_prime(i)):
                 i += 1
             if i > n:
                 break
@@ -32,13 +32,13 @@ def is_winner(x, nums):
             i += 1
 
         if winner % 2 == 0:
-            maria_wins += 1
+            players['Maria'] += 1
         else:
-            ben_wins += 1
+            players['Ben'] += 1
 
-    if maria_wins > ben_wins:
-        return "Maria"
-    elif ben_wins > maria_wins:
-        return "Ben"
+    if players['Ben'] < players['Maria']:
+        return 'Maria'
+    elif players['Ben'] > players['Maria']:
+        return 'Ben'
     else:
         return None
