@@ -2,27 +2,39 @@
 """Prime number game"""
 
 
+def is_prime(n):
+    """Determines the winner of a series of games played"""
+    if n <= 1:
+        return False
+
+    i = 2
+    while i * i <= n:
+        if n % i == 0:
+            return False
+        i += 1
+    return True
+
+
 def is_winner(x, nums):
     """Determines the winner of a series of games played"""
+    maria_wins = 0
+    ben_wins = 0
 
-    def get_primes(n):
-        """Generates prime numbers up to a given number"""
-        sieve = [True] * (n + 1)
-        sieve[0] = sieve[1] = False
-        for i in range(2, int(n**0.5) + 1):
-            if sieve[i]:
-                sieve[i * i:n + 1:i] = [False] * len(sieve[i * i:n + 1:i])
-        return [i for i in range(n + 1) if sieve[i]]
+    for n in nums:
+        winner = 1
+        i = 2
+        while i <= n:
+            while i <= n + 1 and not is_prime(i):
+                i += 1
+            if i > n:
+                break
+            winner += 1
+            i += 1
 
-    primes = [0] + get_primes(max(nums) * 2)
-
-    def can_win(n):
-        """Determines if a player can win a game for a given upper limit n"""
-        primes_count = sum(1 for p in primes if p <= n)
-        return primes_count % 2 != 0
-
-    maria_wins = sum(can_win(n) for n in nums)
-    ben_wins = x - maria_wins
+        if winner % 2 == 0:
+            maria_wins += 1
+        else:
+            ben_wins += 1
 
     if maria_wins > ben_wins:
         return "Maria"
