@@ -2,43 +2,31 @@
 """Prime number game"""
 
 
-def is_prime(n):
+def primeNumbers(n):
     """Determines the winner of a series of games played"""
-    if n <= 1:
-        return False
+    primeNos = []
+    filtered = [True] * (n + 1)
+    for prime in range(2, n + 1):
+        if (filtered[prime]):
+            primeNos.append(prime)
+            for i in range(prime, n + 1, prime):
+                filtered[i] = False
+    return primeNos
 
-    i = 2
-    while i * i <= n:
-        if n % i == 0:
-            return False
-        i += 1
-    return True
 
-
-def is_winner(x, nums):
+def isWinner(x, nums):
     """Determines the winner of a series of games played"""
-    players = {'Maria': 0, 'Ben': 0}
-    for round in range(x):
-        n = nums[round]
-
-        winner = 1
-        i = 2
-        while i <= n:
-            while (i <= n + 1) and (not is_prime(i)):
-                i += 1
-            if i > n:
-                break
-            winner += 1
-            i += 1
-
-        if winner % 2 == 0:
-            players['Maria'] += 1
-        else:
-            players['Ben'] += 1
-
-    if players['Ben'] < players['Maria']:
-        return 'Maria'
-    elif players['Ben'] > players['Maria']:
-        return 'Ben'
-    else:
+    if x is None or nums is None or x == 0 or nums == []:
         return None
+    Maria = Ben = 0
+    for i in range(x):
+        primeNos = primeNumbers(nums[i])
+        if len(primeNos) % 2 == 0:
+            Ben += 1
+        else:
+            Maria += 1
+    if Maria > Ben:
+        return 'Maria'
+    elif Ben > Maria:
+        return 'Ben'
+    return None
